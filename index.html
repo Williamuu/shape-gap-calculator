@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-title" content="Shape Solver">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f5f6f2">
+<title>图形秒答 · Gap Challenge 计算器</title>
+<script>
+(() => {
+  'use strict';
+  const storageKey = 'gap-calculator-theme';
+  const modes = ['system', 'light', 'dark'];
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  let mode = 'system';
+  try {
+    const saved = localStorage.getItem(storageKey);
+    if (modes.includes(saved)) mode = saved;
+  } catch {}
+  function apply() {
+    const dark = mode === 'dark' || (mode === 'system' && media.matches);
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+    document.querySelector('meta[name="theme-color"]').content = dark ? '#141414' : '#f5f6f2';
+  }
+  window.GapTheme = {
+    getMode: () => mode,
+    setMode(next) {
+      if (!modes.includes(next)) return;
+      mode = next;
+      try { localStorage.setItem(storageKey, mode); } catch {}
+      apply();
+    }
+  };
+  if (media.addEventListener) media.addEventListener('change', apply);
+  else if (media.addListener) media.addListener(apply);
+  apply();
+})();
+
+</script>
+<style>
+:root{color-scheme:light;--bg:#f5f6f2;--paper:#fff;--ink:#202b29;--muted:#64716b;--line:#e3e8e1;--green:#176b52;--green-soft:#eaf4ed;--danger:#b43c45;--purple:#804397;--cyan:#34b3e2;--red:#ff3b1f;--lime:#80ae18;--yellow:#ffbe1b;--blue:#466cbd;--focus:#72b19b;--subtle:#748479;--brand-light:#97b8a1;--brand-pale:#bfd2bc;--control-hover:#edf2eb;--action-bg:#176b52;--action-ink:#fff;--action-hover:#105840;--cell:#e6e6e6;--cell-hover:#dce6df;--cell-selected:#f0f6ee;--selection-halo:#176b5210;--danger-soft:#fff0f1;--cell-inferred:#f0f4f5;--inferred-opacity:.55;--multi-dot:#667e87;--control-hover-border:#aac5b4;--palette-hover:#f7faf5;--answer:#fcfefb;--placeholder:#a1b1a3;--input-bg:#fafbf8;--answer-border:#d3e3d1;--float-shadow:#243c2110;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button,select{cursor:pointer}button{touch-action:manipulation}button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:3px}button:disabled{cursor:default;opacity:.42}button{color:inherit}a{color:var(--green)}[hidden]{display:none!important}.shell{max-width:1112px;margin:auto;padding:35px 32px 28px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:34px}.brand{display:flex;align-items:center;gap:11px;font-size:15px;font-weight:650;letter-spacing:.02em}.mark{width:31px;height:31px;display:grid;grid-template-columns:1fr 1fr;gap:4px}.mark span{background:var(--green);border-radius:3px}.mark span:nth-child(2){border-radius:50%;background:var(--brand-light)}.mark span:nth-child(3){background:var(--brand-pale)}.offline{display:flex;gap:7px;align-items:center;color:var(--muted);font-size:12px}.dot{width:6px;height:6px;background:var(--green);border-radius:50%}.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:27px}.eyebrow{font-size:11px;letter-spacing:.14em;color:var(--green);font-weight:650;margin:0 0 11px}.hero h1{font-size:35px;letter-spacing:-.035em;line-height:1.2;margin:0 0 12px;font-weight:700}.subtitle{font-size:14px;color:var(--muted);margin:0;line-height:1.75}.actions{display:flex;gap:8px;flex-shrink:0}.btn{border:1px solid var(--line);border-radius:9px;background:var(--paper);padding:10px 14px;font-size:13px;line-height:1.35;font-weight:550;transition:background .12s}.btn:hover:not(:disabled){background:var(--control-hover)}.btn.primary{background:var(--action-bg);color:var(--action-ink);border-color:var(--action-bg)}.btn.primary:hover{background:var(--action-hover)}.btn.quiet{background:transparent}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:22px;align-items:start}.panel{background:var(--paper);border:1px solid var(--line);border-radius:17px}.board-panel{padding:24px 27px}.panel-heading{display:flex;justify-content:space-between;gap:12px;align-items:center}.section-label{font-weight:650;font-size:15px;margin:0}.step{color:var(--subtle);font-size:11px;font-weight:500;margin-right:8px;font-variant-numeric:tabular-nums}.size-control{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.size-control select{appearance:auto;border:1px solid var(--line);border-radius:7px;padding:7px 8px;background:var(--paper);color:var(--ink);font-weight:550;font-size:13px}.board-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--muted);font-size:12px;margin:17px 0 12px;min-height:21px}.tag{font-size:11px;background:var(--green-soft);color:var(--green);border-radius:5px;padding:3px 7px;white-space:nowrap}.board-wrap{max-width:452px;margin:0 auto}.grid{display:grid;grid-template-columns:22px repeat(var(--n),minmax(0,1fr));gap:7px;align-items:center}.axis{font-size:10px;text-align:center;color:var(--subtle);line-height:18px;font-variant-numeric:tabular-nums}.cell{position:relative;display:flex;justify-content:center;align-items:center;aspect-ratio:1;min-width:0;width:100%;padding:0;background:var(--cell);border:1px solid transparent;border-radius:8px;transition:background .1s,border-color .1s}.cell:hover{background:var(--cell-hover)}.cell.selected{border:2px solid var(--green);background:var(--cell-selected);box-shadow:0 0 0 3px var(--selection-halo)}.cell.target{background:var(--cell)}.cell.error{border:2px solid var(--danger);background:var(--danger-soft)}.cell.inferred{background:var(--cell-inferred)}.cell.inferred .shape{opacity:var(--inferred-opacity)}.cell .shape{width:68%;height:68%}.cell.target .question{font-size:42px;color:var(--ink);font-weight:600;line-height:1}.cell-num{display:none;position:absolute;bottom:5px;right:7px;font-size:10px;color:var(--subtle);line-height:1}.target-dot{position:absolute;top:5px;left:7px;font-size:11px;color:var(--green);font-weight:700}.multi-dot{position:absolute;top:7px;right:7px;width:5px;height:5px;background:var(--multi-dot);border-radius:50%}.shape{display:inline-block;flex-shrink:0;width:30px;height:30px;background:currentColor}.shape.s1{color:var(--cyan);clip-path:polygon(30% 0,70% 0,70% 30%,100% 30%,100% 70%,70% 70%,70% 100%,30% 100%,30% 70%,0 70%,0 30%,30% 30%);border-radius:3px}.shape.s2{color:var(--red);border-radius:3px}.shape.s3{color:var(--lime);border-radius:50%}.shape.s4{color:var(--yellow);clip-path:polygon(50% 3%,100% 96%,0 96%)}.shape.s5{color:var(--purple);clip-path:polygon(50% 0%,65% 32%,100% 38%,75% 63%,81% 100%,50% 82%,19% 100%,25% 63%,0 38%,35% 32%)}.shape.s6{color:var(--blue);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}.selection-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:17px 0 22px;font-size:12px;color:var(--muted)}.selection-tools .btn{font-size:12px;padding:7px 10px;border-radius:7px}.tool-buttons{display:flex;gap:6px}.palette-heading{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:18px;margin-bottom:12px;font-size:12px;color:var(--muted)}.palette-heading strong{font-size:13px;color:var(--ink);font-weight:550}.palette{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:8px}.shape-button{border:1px solid var(--line);background:var(--paper);border-radius:10px;display:flex;flex-direction:column;align-items:center;padding:12px 4px 9px;gap:8px;min-width:0}.shape-button:hover{border-color:var(--control-hover-border);background:var(--palette-hover)}.shape-key{display:flex;gap:5px;align-items:center;font-size:11px;color:var(--muted);white-space:nowrap}.key{font-size:10px;font-variant-numeric:tabular-nums}.board-options{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:17px;color:var(--muted);font-size:12px}.check{display:flex;align-items:center;gap:6px;cursor:pointer}.check input{accent-color:var(--green);margin:0;width:14px;height:14px}.keyboard-note{font-size:11px;color:var(--subtle);line-height:1.8;margin:13px 0 0}.side{display:grid;gap:16px}.answer-panel{padding:23px;background:var(--answer);overflow:hidden}.answer-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.live-status{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}.answer-location{font-size:12px;color:var(--muted);margin:0;text-align:center}.answer-art{height:106px;display:flex;justify-content:center;align-items:center;gap:14px;margin:8px 0}.answer-art .shape{width:75px;height:75px}.answer-art.multiple .shape{width:35px;height:35px}.answer-art.multiple{flex-wrap:wrap;padding:8px;gap:15px}.placeholder-symbol{font-size:56px;line-height:1;color:var(--placeholder);font-weight:400}.answer-title{text-align:center;font-size:24px;font-weight:650;margin:0 0 8px;line-height:1.4}.answer-subtitle{text-align:center;font-size:12px;color:var(--muted);margin:0;line-height:1.8;min-height:22px}.certainty{display:flex;justify-content:center;margin-top:15px}.certainty span{font-size:11px;color:var(--green);background:var(--green-soft);border-radius:100px;padding:5px 10px}.answer-rule{border-top:1px solid var(--line);margin:22px 0 0;padding-top:16px;font-size:12px;color:var(--muted);line-height:1.8}.result-error .answer-title{color:var(--danger);font-size:21px}.result-error .certainty span{background:var(--danger-soft);color:var(--danger)}.reference-toggle{margin:15px 0 0;padding:13px 0 0;border-top:1px solid var(--line);font-size:12px;line-height:1.8;color:var(--muted)}.reference-note{font-size:11px;margin:8px 0 0;color:var(--subtle);line-height:1.7}.help-panel{padding:21px 23px}.help-panel h2{font-size:13px;font-weight:650;margin:0 0 14px}.help-step{display:flex;gap:10px;font-size:12px;line-height:1.8;margin:10px 0;color:var(--muted)}.help-step .number{color:var(--green);font-weight:650;font-size:11px;margin-top:1px}.help-step strong{font-weight:550;color:var(--ink)}.rule-note{font-size:11px;color:var(--subtle);line-height:1.8;border-top:1px solid var(--line);padding-top:13px;margin:16px 0 0}.import-panel{margin-top:19px;border-top:1px solid var(--line);padding-top:15px}.import-panel summary{font-size:12px;color:var(--muted);cursor:pointer;list-style-position:inside}.import-panel label{display:block;font-size:12px;color:var(--muted);line-height:1.8;margin:14px 0 8px}.import-panel textarea{width:100%;min-height:124px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:10px;font:14px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--ink);background:var(--input-bg)}.import-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.import-error{font-size:12px;color:var(--danger);margin:10px 0 0;line-height:1.7}.footer{display:flex;justify-content:space-between;gap:16px;margin:21px 2px 0;color:var(--subtle);font-size:11px;line-height:1.8}.message{font-size:12px;color:var(--green);margin-top:9px;line-height:1.6}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(min-width:1300px){.shell{padding-top:48px}}@media(max-width:850px){.shell{padding:25px 22px}.workspace{grid-template-columns:minmax(0,1fr) 270px;gap:16px}.board-panel{padding:21px 19px}.shape-key .shape-name{display:none}.answer-panel,.help-panel{padding:20px}.hero h1{font-size:31px}.hero{align-items:start}.hero .actions{flex-direction:column}.cell.target .question{font-size:30px}}
+@media(max-width:660px){.shell{padding:20px 16px}.topbar{margin-bottom:26px}.hero{display:block;margin-bottom:20px}.hero h1{font-size:30px}.hero .actions{flex-direction:row;margin-top:16px}.workspace{grid-template-columns:1fr;gap:16px}.board-panel{padding:20px 18px}.board-wrap{max-width:452px}.side{grid-template-columns:1fr}.help-panel{display:none}.answer-panel{padding:20px}.answer-heading{margin-bottom:14px}.answer-art{height:70px;margin:12px 0}.answer-art .shape{width:57px;height:57px}.answer-title{font-size:22px}.answer-rule{margin-top:16px;padding-top:13px}.certainty{margin-top:10px}.footer{flex-direction:column;gap:4px}.shape-key .shape-name{display:inline}.offline{font-size:11px}.cell.target .question{font-size:35px}}
+@media(max-width:370px){.shell{padding:18px 11px}.board-panel{padding:17px 12px}.grid{gap:5px;grid-template-columns:17px repeat(var(--n),minmax(0,1fr))}.cell{border-radius:7px}.shape-key .shape-name{display:none}.selection-tools{flex-wrap:wrap}.shape-button{padding:10px 2px 8px}.palette{gap:5px}.brand{font-size:14px}.offline{font-size:10px}.hero h1{font-size:28px}.cell-num{font-size:9px;bottom:4px;right:5px}}
+.mobile-answer{display:none}
+@media(max-width:660px){.mobile-answer{position:sticky;top:8px;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--answer);border:1px solid var(--answer-border);border-radius:12px;padding:12px 15px;margin-bottom:14px;box-shadow:0 3px 12px var(--float-shadow)}.mobile-answer-title{font-size:16px;font-weight:650;line-height:1.5}.mobile-answer-detail{font-size:11px;color:var(--muted);line-height:1.6;margin-top:3px}.mobile-answer-art{display:flex;gap:6px;max-width:80px;flex-wrap:wrap;justify-content:center}.mobile-answer-art .shape{width:28px;height:28px}.mobile-answer-art .placeholder-symbol{font-size:25px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.header-tools{display:flex;align-items:center;gap:16px}.language-control select,.appearance-control select{border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--paper);color:var(--ink);font-size:13px}.selection-tools{flex-wrap:wrap}.tool-buttons{flex-wrap:wrap}.header-tools .offline{white-space:nowrap}
+@media(max-width:850px){html[lang="en"] .shape-key .shape-name{display:none}}
+@media(max-width:660px){.header-tools .offline{display:none}.language-control select,.appearance-control select{font-size:14px}.hero h1{max-width:440px}html[lang="en"] .answer-heading{flex-wrap:wrap;gap:9px}}
+
+:root[data-theme="dark"]{color-scheme:dark;--bg:#141414;--paper:#202020;--ink:#f1f1f1;--muted:#b7b7b7;--subtle:#a5a5a5;--line:#3b3b3b;--green:#dedede;--green-soft:#323232;--danger:#ff9da5;--focus:#cfcfcf;--brand-light:#9a9a9a;--brand-pale:#555555;--control-hover:#2f2f2f;--action-bg:#dcdcdc;--action-ink:#191919;--action-hover:#f0f0f0;--cell:#353535;--cell-hover:#424242;--cell-selected:#474747;--selection-halo:#ffffff18;--danger-soft:#3b272b;--cell-inferred:#303030;--inferred-opacity:.82;--multi-dot:#cbcbcb;--control-hover-border:#737373;--palette-hover:#2d2d2d;--answer:#222222;--placeholder:#b9b9b9;--input-bg:#1a1a1a;--answer-border:#4b4b4b;--float-shadow:#00000060;--purple:#c68df0;--cyan:#4bc6f0;--red:#ff6c59;--lime:#9acb43;--yellow:#ffcd4a;--blue:#88a9ff}
+.topbar{flex-wrap:wrap}.brand{flex-shrink:0}.header-tools{gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}.import-panel textarea::placeholder{color:var(--subtle);opacity:1}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <div class="brand"><div class="mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div><span data-i18n="brand">Shape Solver</span></div>
+    <div class="header-tools"><div class="offline"><span class="dot"></span><span data-i18n="offline">Offline · Instant results</span></div><label class="appearance-control"><span class="sr-only" data-i18n="appearance">Appearance</span><select id="theme" aria-label="Appearance" data-i18n-aria="appearance"><option value="system" data-i18n="themeSystem">System</option><option value="light" data-i18n="themeLight">Light</option><option value="dark" data-i18n="themeDark">Dark</option></select></label><label class="language-control"><span class="sr-only" data-i18n="language">Language</span><select id="language" aria-label="Language" data-i18n-aria="language"><option value="en" lang="en">English</option><option value="zh" lang="zh-CN">中文</option></select></label></div>
+  </header>
+  <section class="hero">
+    <div><p class="eyebrow">GAP CHALLENGE SOLVER</p><h1 data-i18n="hero">Turn the gap into an answer.</h1><p class="subtitle" data-i18n="subtitle">Enter the known shapes, mark the missing cell, and see the answer.</p></div>
+    <div class="actions"><button class="btn" id="sample" data-i18n="sample">载入图片示例</button><button class="btn quiet" id="clear" data-i18n="clear">清空棋盘</button></div>
+  </section>
+  <div class="mobile-answer" aria-hidden="true"><div><div class="mobile-answer-title" id="mobile-title">正在计算</div><div class="mobile-answer-detail" id="mobile-detail">问号答案</div></div><div id="mobile-art" class="mobile-answer-art"></div></div>
+  <div class="workspace">
+    <section class="panel board-panel" aria-labelledby="board-heading">
+      <div class="panel-heading"><h2 class="section-label" id="board-heading"><span class="step">01</span><span data-i18n="boardHeading">Enter your puzzle</span></h2><label class="size-control"><span data-i18n="boardSize">Size</span><select id="size" aria-label="Board size" data-i18n-aria="boardSizeLabel"><option value="3">3 × 3</option><option value="4">4 × 4</option><option value="5" selected>5 × 5</option><option value="6">6 × 6</option></select></label></div>
+      <div class="board-meta"><span id="filled">已填 8 / 25 格</span><span class="tag" id="sample-tag" data-i18n="sampleTag">图片示例</span><span id="view-tag" data-i18n="referenceTag" class="tag" hidden>参考填法</span></div>
+      <div class="board-wrap"><div id="grid" class="grid" style="--n:5" role="group" aria-label="Shape puzzle board" data-i18n-aria="gridLabel"></div></div>
+      <div class="selection-tools"><span id="selected-location">当前：第 1 行，第 1 列</span><div class="tool-buttons"><button class="btn" id="target-button" title="将当前格清空并标为问号">标为问号 ?</button><button class="btn" id="erase" data-i18n="erase" data-i18n-title="eraseHelp" title="清除当前格（Backspace）">擦除</button><button class="btn" id="undo" data-i18n="undo" data-i18n-title="undoHelp" title="撤销（Ctrl / ⌘ + Z）" disabled>撤销</button></div></div>
+      <div class="palette-heading"><strong data-i18n="chooseShape">Choose a shape</strong><span id="palette-hint">或按键盘 1–5</span></div>
+      <div id="palette" class="palette" style="--n:5" aria-label="Shape input" data-i18n-aria="paletteLabel"></div>
+      <div class="board-options"><label class="check"><input type="checkbox" id="advance" checked><span data-i18n="advance">Auto-advance after input</span></label><button class="btn quiet" id="solve" data-i18n="solve" style="padding:6px 10px;font-size:12px">重新计算 ↵</button></div>
+      <p class="keyboard-note" data-i18n="keyboard">方向键移动 · 空格跳过 · ? 标记问号 · 0 / Delete 擦除</p>
+      <details class="import-panel" id="import-details"><summary data-i18n="importSummary">Paste a number grid</summary><label for="paste" data-i18n="importHelp">用 1–6 代表图形，0 或 . 代表空格，? 代表问号。支持 3–6 阶，自动识别大小。</label><textarea id="paste" spellcheck="false" placeholder="0 0 0 2 0&#10;5 0 0 3 0&#10;4 0 0 5 0&#10;0 ? 2 0 3&#10;0 0 4 0 0" aria-describedby="import-error"></textarea><div class="import-actions"><button class="btn primary" id="import" data-i18n="import">导入并计算</button><button class="btn" id="copy" data-i18n="copy">复制题目</button></div><p class="import-error" id="import-error" role="alert" hidden></p><p class="message" id="import-message" role="status" hidden></p></details>
+    </section>
+    <aside class="side">
+      <section class="panel answer-panel" id="answer-panel" aria-labelledby="answer-heading">
+        <div class="answer-heading"><h2 class="section-label" id="answer-heading"><span class="step">02</span><span id="answer-label">问号答案</span></h2><span class="live-status"><span class="dot"></span><span id="timing">计算中</span></span></div>
+        <div id="answer-content" aria-live="polite" aria-atomic="true"><p class="answer-location" id="answer-location">第 4 行 · 第 2 列</p><div class="answer-art" id="answer-art"><span class="placeholder-symbol">?</span></div><h3 class="answer-title" id="answer-title">正在计算</h3><p class="answer-subtitle" id="answer-subtitle">正在核对所有可行答案</p><div class="certainty" id="certainty"><span>自动求解</span></div></div>
+        <p class="answer-rule" id="answer-rule">按每行、每列图形不重复的规则求解。</p>
+        <div class="reference-toggle"><label class="check"><input type="checkbox" id="show-solution" disabled><span data-i18n="showSolution">Show one complete solution</span></label><p class="reference-note" id="reference-note" data-i18n="referenceNote" hidden>浅色图形为推算结果；右上角圆点表示该格还有其他可能。</p></div>
+      </section>
+      <section class="panel help-panel"><h2 data-i18n="helpHeading">Three steps to an answer</h2><div class="help-step"><span class="number">1</span><span><strong data-i18n="helpOne">录入已知图形</strong><br><span data-i18n="helpOneBody">点击格子，再点图形或按对应数字。</span></span></div><div class="help-step"><span class="number">2</span><span><strong data-i18n="helpTwo">标记问号位置</strong><br><span data-i18n="helpTwoBody">选中目标格，点击「标为问号」。</span></span></div><div class="help-step"><span class="number">3</span><span><strong data-i18n="helpThree">直接看结果</strong><br><span data-i18n="helpThreeBody">每次输入自动计算，不必点击提交。</span></span></div><p class="rule-note" data-i18n="rules">规则：每行、每列，每种图形各出现一次。不使用普通数独的小宫格规则，也不限制对角线。</p></section>
+    </aside>
+  </div>
+  <footer class="footer"><span data-i18n="footer">Runs locally, even offline. Your puzzle is saved in this browser.</span><span data-i18n="footerFeatures">3–6 grid sizes · Conflict and multiple-answer detection</span></footer>
+  <div id="notice" class="sr-only" role="status"></div>
+</main>
+<script id="solver-code">
+(function (root) {
+  'use strict';
+
+  const clock = () => typeof performance !== 'undefined' && performance.now
+    ? performance.now() : Date.now();
+  const bitCount = n => {
+    let count = 0;
+    while (n) { n &= n - 1; count++; }
+    return count;
+  };
+  const bitValue = bit => 32 - Math.clz32(bit);
+  const maskValues = (mask, size) => {
+    const values = [];
+    for (let value = 1; value <= size; value++) {
+      if (mask & (1 << (value - 1))) values.push(value);
+    }
+    return values;
+  };
+
+  /**
+   * Solve an N x N Latin square, where N is 3 through 6 and 0 is blank.
+   * No box or diagonal constraints are applied.
+   *
+   * candidates[i] contains only values witnessed in an actual complete solution.
+   * verified[i] says that every other possible value has been ruled out, so the
+   * candidate list is exhaustive. A timeout can therefore never invent a unique
+   * answer. target, when supplied, is verified before other empty cells.
+   *
+   * Invalid input has status 'invalid'. Consistent givens with no completion have
+   * status 'unsatisfiable'. 'ok' means every candidate list has been verified.
+   * 'timeout' may include a complete solution and partially verified candidates.
+   * unique is true only after uniqueness is proved, false after two different
+   * solutions are witnessed, and null when unknown or no solution exists.
+   */
+  function analyze(options) {
+    const start = clock();
+    options = options || {};
+    const size = options.size;
+    const values = options.values;
+    const target = options.target;
+    const timeLimitMs = options.timeLimitMs === undefined ? 1500 : options.timeLimitMs;
+    const errors = [];
+    const validSize = Number.isInteger(size) && size >= 3 && size <= 6;
+    const count = validSize ? size * size : 0;
+    const result = {
+      status: 'invalid', solution: null,
+      candidates: Array.from({ length: count }, () => []),
+      verified: Array(count).fill(false),
+      complete: false, unique: null, errors, elapsedMs: 0
+    };
+    const finish = () => {
+      result.elapsedMs = Math.max(0, clock() - start);
+      return result;
+    };
+    if (!validSize) errors.push({ code: 'invalidSize', params: {}, message: '棋盘边长必须是 3、4、5 或 6。', cells: [] });
+    if (!Array.isArray(values) || values.length !== count) {
+      errors.push({ code: 'invalidCount', params: {}, message: '格子数量必须与棋盘大小一致。', cells: [] });
+    }
+    if (target !== undefined && target !== null &&
+        (!Number.isInteger(target) || target < 0 || target >= count)) {
+      errors.push({ code: 'invalidTarget', params: {}, message: '问号位置超出棋盘范围。', cells: [] });
+    }
+    if (!Number.isFinite(timeLimitMs) || timeLimitMs < 0) {
+      errors.push({ code: 'invalidTimeLimit', params: {}, message: '计算时限必须是非负的有限数值。', cells: [] });
+    }
+    if (errors.length) return finish();
+    for (let i = 0; i < count; i++) {
+      if (!Number.isInteger(values[i]) || values[i] < 0 || values[i] > size) {
+        errors.push({ code: 'invalidValue', params: { size }, message: `请输入 0 至 ${size} 的整数，0 表示空格。`, cells: [i] });
+      }
+    }
+    if (errors.length) return finish();
+
+    for (let axis = 0; axis < 2; axis++) {
+      for (let line = 0; line < size; line++) {
+        const groups = Array.from({ length: size + 1 }, () => []);
+        for (let offset = 0; offset < size; offset++) {
+          const index = axis === 0 ? line * size + offset : offset * size + line;
+          if (values[index]) groups[values[index]].push(index);
+        }
+        for (let value = 1; value <= size; value++) {
+          if (groups[value].length > 1) {
+            errors.push({
+              code: 'duplicate', params: { axis: axis === 0 ? 'row' : 'column', line: line + 1, value },
+              message: `第 ${line + 1} ${axis === 0 ? '行' : '列'}的图形 ${value} 重复。`,
+              cells: groups[value]
+            });
+          }
+        }
+      }
+    }
+    if (errors.length) return finish();
+
+    const fullMask = (1 << size) - 1;
+    const rowOf = Array.from({ length: count }, (_, i) => Math.floor(i / size));
+    const colOf = Array.from({ length: count }, (_, i) => i % size);
+    const initialRows = Array(size).fill(0);
+    const initialCols = Array(size).fill(0);
+    for (let i = 0; i < count; i++) {
+      if (values[i]) {
+        const bit = 1 << (values[i] - 1);
+        initialRows[rowOf[i]] |= bit;
+        initialCols[colOf[i]] |= bit;
+      }
+    }
+    const allowed = values.map((value, i) => value ? 1 << (value - 1)
+      : fullMask & ~(initialRows[rowOf[i]] | initialCols[colOf[i]]));
+    const witnessed = Array(count).fill(0);
+    const ruledOut = Array(count).fill(0);
+    const deadline = start + timeLimitMs;
+    const TIMEOUT = {};
+    let nodes = 0;
+    function checkTime(force) {
+      if ((force || (++nodes & 63) === 0) && clock() >= deadline) throw TIMEOUT;
+    }
+
+    function findSolution(forcedIndex, forcedBit) {
+      checkTime(true);
+      const grid = values.slice();
+      const rows = initialRows.slice();
+      const cols = initialCols.slice();
+      const trail = [];
+      const domain = index => fullMask & ~(rows[rowOf[index]] | cols[colOf[index]]);
+      function place(index, bit) {
+        grid[index] = bitValue(bit);
+        rows[rowOf[index]] |= bit;
+        cols[colOf[index]] |= bit;
+        trail.push(index);
+      }
+      function rollback(mark) {
+        while (trail.length > mark) {
+          const index = trail.pop();
+          const bit = 1 << (grid[index] - 1);
+          rows[rowOf[index]] &= ~bit;
+          cols[colOf[index]] &= ~bit;
+          grid[index] = 0;
+        }
+      }
+      if (forcedIndex !== undefined) {
+        if (!(domain(forcedIndex) & forcedBit)) return null;
+        place(forcedIndex, forcedBit);
+      }
+
+      function search() {
+        checkTime(false);
+        const mark = trail.length;
+        let bestIndex = -1;
+        let bestMask = 0;
+        let changed;
+        do {
+          changed = false;
+          bestIndex = -1;
+          let bestCount = size + 1;
+          for (let index = 0; index < count; index++) {
+            if (grid[index]) continue;
+            const mask = domain(index);
+            if (!mask) { rollback(mark); return null; }
+            if ((mask & (mask - 1)) === 0) {
+              place(index, mask);
+              changed = true;
+            } else {
+              const length = bitCount(mask);
+              if (length < bestCount) {
+                bestCount = length; bestIndex = index; bestMask = mask;
+              }
+            }
+          }
+          // Each missing symbol must have at least one possible cell in every
+          // row and column. Its sole possible cell is a forced placement.
+          for (let axis = 0; axis < 2; axis++) {
+            const used = axis === 0 ? rows : cols;
+            for (let line = 0; line < size; line++) {
+              let missing = fullMask & ~used[line];
+              while (missing) {
+                const bit = missing & -missing;
+                missing ^= bit;
+                let only = -1;
+                for (let offset = 0; offset < size; offset++) {
+                  const index = axis === 0 ? line * size + offset : offset * size + line;
+                  if (!grid[index] && (domain(index) & bit)) {
+                    if (only !== -1) { only = -2; break; }
+                    only = index;
+                  }
+                }
+                if (only === -1) { rollback(mark); return null; }
+                if (only >= 0) { place(only, bit); changed = true; }
+              }
+            }
+          }
+        } while (changed);
+
+        if (bestIndex === -1) {
+          const solution = grid.slice();
+          rollback(mark);
+          return solution;
+        }
+        // Prefer values not seen in prior solutions, often proving many other
+        // candidate cells while checking just one specific hypothesis.
+        const priorities = [bestMask & ~witnessed[bestIndex], bestMask & witnessed[bestIndex]];
+        for (let mask of priorities) {
+          while (mask) {
+            const bit = mask & -mask;
+            mask ^= bit;
+            const branchMark = trail.length;
+            place(bestIndex, bit);
+            const found = search();
+            rollback(branchMark);
+            if (found) { rollback(mark); return found; }
+          }
+        }
+        rollback(mark);
+        return null;
+      }
+      return search();
+    }
+
+    function record(solution) {
+      if (!result.solution) result.solution = solution;
+      for (let index = 0; index < count; index++) {
+        witnessed[index] |= 1 << (solution[index] - 1);
+      }
+    }
+    function updateCandidates() {
+      for (let index = 0; index < count; index++) {
+        result.candidates[index] = maskValues(witnessed[index], size);
+        result.verified[index] = Boolean(result.solution) &&
+          (allowed[index] & ~(witnessed[index] | ruledOut[index])) === 0;
+      }
+      result.complete = result.verified.every(Boolean);
+      const multiple = witnessed.some(mask => (mask & (mask - 1)) !== 0);
+      result.unique = multiple ? false : (result.complete && result.solution ? true : null);
+    }
+
+    try {
+      const first = findSolution();
+      if (!first) {
+        result.status = 'unsatisfiable';
+        result.complete = true;
+        result.verified.fill(true);
+        errors.push({ code: 'unsatisfiable', params: {}, message: '这些已知图形无法组成符合每行每列不重复规则的棋盘。', cells: [] });
+        return finish();
+      }
+      record(first);
+      const order = Array.from({ length: count }, (_, index) => index);
+      if (target !== undefined && target !== null) {
+        order.splice(target, 1);
+        order.unshift(target);
+      }
+      for (const index of order) {
+        let unknown = allowed[index] & ~(witnessed[index] | ruledOut[index]);
+        while (unknown) {
+          const bit = unknown & -unknown;
+          const solution = findSolution(index, bit);
+          if (solution) record(solution);
+          else ruledOut[index] |= bit;
+          unknown = allowed[index] & ~(witnessed[index] | ruledOut[index]);
+        }
+      }
+      updateCandidates();
+      result.status = 'ok';
+    } catch (error) {
+      if (error !== TIMEOUT) throw error;
+      updateCandidates();
+      result.status = 'timeout';
+    }
+    return finish();
+  }
+
+  root.GapSolver = { analyze };
+  if (typeof module !== 'undefined' && module.exports) module.exports = root.GapSolver;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const COPY = {
+  en: {
+    title: 'Shape Solver · Gap Challenge Calculator',
+    brand: 'Shape Solver', language: 'Language', offline: 'Offline · Auto-solve',
+    appearance: 'Appearance', themeSystem: 'System', themeLight: 'Light', themeDark: 'Dark',
+    hero: 'Turn the gap into an answer.',
+    subtitle: 'Enter the known shapes, mark the missing cell, and see the answer.',
+    sample: 'Load example', clear: 'Clear board', boardHeading: 'Enter your puzzle',
+    boardSize: 'Size', boardSizeLabel: 'Board size', sampleTag: 'Image example',
+    referenceTag: 'Example solution', gridLabel: 'Shape puzzle board', paletteLabel: 'Shape input',
+    erase: 'Erase', eraseHelp: 'Clear the selected cell (Backspace)',
+    undo: 'Undo', undoHelp: 'Undo (Ctrl / ⌘ + Z)', chooseShape: 'Choose a shape',
+    advance: 'Auto-advance after input', solve: 'Recalculate ↵',
+    keyboard: 'Arrow keys to move · Space to skip · ? to mark the target · 0 / Delete to erase',
+    importSummary: 'Paste a number grid',
+    importHelp: 'Use 1–6 for shapes, 0 or . for blanks, and ? for the missing cell. Supports 3×3 to 6×6 grids; size is detected automatically.',
+    import: 'Import & solve', copy: 'Copy puzzle',
+    showSolution: 'Show one complete solution',
+    referenceNote: 'Faded shapes show one valid completion. A dot in the top-right corner means that cell has other possible answers.',
+    helpHeading: 'Three steps to an answer',
+    helpOne: 'Enter the known shapes', helpOneBody: 'Click a cell, then choose a shape or press its number.',
+    helpTwo: 'Mark the missing cell', helpTwoBody: 'Select the target cell and click “Mark ?”.',
+    helpThree: 'See the result', helpThreeBody: 'Results update after every entry. No need to submit.',
+    rules: 'Each shape must appear exactly once in every row and column. There are no box or diagonal restrictions.',
+    footer: 'Runs locally, even offline. Your puzzle is saved in this browser.',
+    footerFeatures: '3×3 to 6×6 · No-solution & multiple-answer checks',
+    names: ['', 'Cross', 'Square', 'Circle', 'Triangle', 'Star', 'Diamond'],
+    colorNames: ['', 'Blue cross', 'Red square', 'Green circle', 'Yellow triangle', 'Purple star', 'Blue diamond'],
+    filled: '{count} / {total} cells filled', location: 'Row {row} · Col {col}',
+    selected: 'Selected: {location}', targetCell: 'Target cell', blankCell: 'Blank',
+    referenceCell: 'Example solution: {shape}', otherPossibilities: 'Other answers possible',
+    cellSeparator: ', ', listSeparator: ', ',
+    markTarget: 'Mark ?', unmarkTarget: 'Unmark ?',
+    markTargetHelp: 'Clear this cell and mark it as the missing cell',
+    unmarkTargetHelp: 'Remove the question mark from this cell',
+    paletteHint: 'Or press 1–{size}', inputShape: 'Enter {value}: {shape}',
+    targetAnswer: 'Target answer', currentAnswer: 'Selected cell', calculating: 'Calculating',
+    calculatingTitle: 'Finding the answer', calculatingSubtitle: 'Checking valid completions',
+    autoSolve: 'Automatic', autoUpdate: 'Results update automatically after each entry.',
+    elapsed: '{ms} ms', elapsedLimit: '{ms} ms elapsed',
+    invalidTitle: 'Conflicting entries', unsatisfiableTitle: 'No solution',
+    checkGivens: 'Check the known shapes',
+    conflictHelp: 'Conflicting cells are marked in red. Edit an entry to recalculate.',
+    unsatisfiableHelp: 'A shape may be in the wrong place. Undo your last entry or compare the board with the original puzzle.',
+    unfinished: 'Not yet solved', timeLimitHelp: 'The time limit was reached. Recalculate, or enter any remaining clues from the original puzzle.',
+    undetermined: 'Not yet determined',
+    noSolutionYet: 'No complete solution has been found yet. This does not prove the puzzle is impossible.',
+    uniqueBoard: 'The complete board also has exactly one solution.',
+    multipleBoards: 'The board has multiple completions. Only answers shared by all completions are marked as certain.',
+    unknownBoard: 'Not all possible values have been checked, so it is not yet known whether the full board has a unique solution.',
+    givenSubtitle: 'Number {value} · A shape you entered', givenBadge: 'Known shape',
+    givenHelp: 'Select an empty cell to see its possible answers, or mark the missing cell with ?.',
+    certainSubtitle: 'Number {value} · The same in every valid completion', certainBadge: 'Unique answer',
+    possibilities: '{count} possibilities', possibleNumbers: 'Possible numbers: {values}',
+    moreClues: 'Not a unique answer',
+    multipleHelp: 'This cell has multiple valid answers. Add any remaining known shapes from the original puzzle.',
+    notFullyVerified: 'Not fully determined', witnessed: 'Confirmed possible: {values}',
+    timeLimit: 'Time limit reached',
+    partialHelp: 'Not all possible values have been checked. The shapes shown may not be the only valid answers. Recalculate, or enter any remaining clues from the original puzzle.',
+    calculationFailed: 'Could not calculate', retryHelp: 'Try recalculating or reopen this page.',
+    cleared: 'Board cleared. You can undo this.', sampleLoaded: 'Example loaded.',
+    pasteFirst: 'Paste a puzzle first.',
+    invalidCharacters: 'Use only 0–6, . and ?, separated by spaces, newlines or commas.',
+    wrongCellCount: 'Expected 9, 16, 25 or 36 cells; found {count}.',
+    tooManyTargets: 'Please use only one question mark.',
+    valueOutsideGrid: 'A {size} × {size} board can only use shapes 1–{size}.',
+    imported: 'Imported a {size} × {size} puzzle.', copied: 'Puzzle copied.',
+    copyManually: 'Touch and hold the selected text, then choose Copy. With a keyboard, press Ctrl / ⌘ + C.',
+    invalidSize: 'Board size must be 3, 4, 5 or 6.',
+    invalidCount: 'The number of cells must match the board size.',
+    invalidTarget: 'The missing cell is outside the board.',
+    invalidTimeLimit: 'The calculation time limit must be a finite, non-negative number.',
+    invalidValue: 'Enter an integer from 0 to {size}; 0 means blank.',
+    duplicate: '{axis} {line} contains shape {value} more than once.',
+    row: 'Row', column: 'Column',
+    unsatisfiable: 'These known shapes cannot form a valid board.',
+    invalidFallback: 'Check your entries. Each row and column must contain each shape exactly once.'
+  },
+  zh: {
+    title: '图形秒答 · Gap Challenge 计算器',
+    brand: '图形秒答', language: '语言', offline: '离线可用 · 自动计算',
+    appearance: '外观', themeSystem: '跟随系统', themeLight: '浅色', themeDark: '暗色',
+    hero: '把问号，变成答案。', subtitle: '填入已知图形，标记问号格，答案即刻更新。',
+    sample: '载入图片示例', clear: '清空棋盘', boardHeading: '录入题目',
+    boardSize: '棋盘', boardSizeLabel: '棋盘大小', sampleTag: '图片示例',
+    referenceTag: '参考填法', gridLabel: '图形数独棋盘', paletteLabel: '图形输入',
+    erase: '擦除', eraseHelp: '清除当前格（Backspace）',
+    undo: '撤销', undoHelp: '撤销（Ctrl / ⌘ + Z）', chooseShape: '选择图形',
+    advance: '输入后自动跳格', solve: '重新计算 ↵',
+    keyboard: '方向键移动 · 空格跳过 · ? 标记问号 · 0 / Delete 擦除',
+    importSummary: '批量粘贴数字棋盘',
+    importHelp: '用 1–6 代表图形，0 或 . 代表空格，? 代表问号。支持 3–6 阶，自动识别大小。',
+    import: '导入并计算', copy: '复制题目',
+    showSolution: '显示一种完整填法',
+    referenceNote: '浅色图形展示一种可行填法；右上角圆点表示该格还有其他可能。',
+    helpHeading: '三步，找到答案',
+    helpOne: '录入已知图形', helpOneBody: '点击格子，再点图形或按对应数字。',
+    helpTwo: '标记问号位置', helpTwoBody: '选中目标格，点击「标为问号」。',
+    helpThree: '直接看结果', helpThreeBody: '每次输入自动计算，不必点击提交。',
+    rules: '规则：每行、每列，每种图形各出现一次。不使用普通数独的小宫格规则，也不限制对角线。',
+    footer: '仅在本机计算，无需联网。棋盘会自动保存在此浏览器。',
+    footerFeatures: '3–6 阶图形数独 · 无解与多解检测',
+    names: ['', '十字', '方形', '圆形', '三角形', '星形', '菱形'],
+    colorNames: ['', '蓝色十字', '红色方形', '绿色圆形', '黄色三角形', '紫色星形', '蓝色菱形'],
+    filled: '已填 {count} / {total} 格', location: '第 {row} 行 · 第 {col} 列',
+    selected: '当前：{location}', targetCell: '问号格', blankCell: '空格',
+    referenceCell: '参考填法：{shape}', otherPossibilities: '还有其他可能',
+    cellSeparator: '，', listSeparator: '、',
+    markTarget: '标为问号 ?', unmarkTarget: '取消问号 ?',
+    markTargetHelp: '将当前格清空并标为问号', unmarkTargetHelp: '取消此格的问号标记',
+    paletteHint: '或按键盘 1–{size}', inputShape: '输入 {value} {shape}',
+    targetAnswer: '问号答案', currentAnswer: '当前格答案', calculating: '计算中',
+    calculatingTitle: '正在计算', calculatingSubtitle: '正在核对可行答案',
+    autoSolve: '自动求解', autoUpdate: '每次输入后自动更新结果。',
+    elapsed: '耗时 {ms} ms', elapsedLimit: '已用 {ms} ms',
+    invalidTitle: '输入有冲突', unsatisfiableTitle: '当前题目无解',
+    checkGivens: '请检查已知图形',
+    conflictHelp: '冲突格已用红色标出。修改已知图形后会自动重算。',
+    unsatisfiableHelp: '可能有图形录入错误。可以撤销上一步，或对照原题检查位置。',
+    unfinished: '暂未完成', timeLimitHelp: '计算达到时间上限。可重新计算，或补充原题中尚未录入的已知图形。',
+    undetermined: '尚未确定', noSolutionYet: '尚未找到完整填法，不能据此判断题目无解。',
+    uniqueBoard: '完整棋盘也只有一种填法。',
+    multipleBoards: '完整棋盘有多种填法；这里只把已确定的结果标为唯一。',
+    unknownBoard: '尚未核对所有可能的数字，暂不能断定完整棋盘是否只有一种填法。',
+    givenSubtitle: '数字 {value} · 这是你录入的已知图形', givenBadge: '已知图形',
+    givenHelp: '点击空格查看可行答案，或将目标格标为问号。',
+    certainSubtitle: '数字 {value} · 所有可行填法中答案一致', certainBadge: '唯一确定',
+    possibilities: '{count} 种可能', possibleNumbers: '可行数字：{values}',
+    moreClues: '条件不足，暂不唯一',
+    multipleHelp: '该格仍有多个符合整盘规则的答案。请继续补充原题中的已知图形。',
+    notFullyVerified: '尚未完全确定', witnessed: '已确认可行：{values}',
+    timeLimit: '计算达到时间上限',
+    partialHelp: '尚未核对所有可能的数字，当前展示的图形可能并非全部可行答案。可重新计算，或补充原题中尚未录入的已知图形。',
+    calculationFailed: '计算未完成', retryHelp: '请重新计算或重新打开页面。',
+    cleared: '棋盘已清空，可以撤销。', sampleLoaded: '已载入图片示例。',
+    pasteFirst: '请先粘贴棋盘。',
+    invalidCharacters: '仅支持数字 0–6、.、?，以及空格、换行或逗号分隔。',
+    wrongCellCount: '需要 9、16、25 或 36 格；当前读取到 {count} 格。',
+    tooManyTargets: '请只保留一个问号格。',
+    valueOutsideGrid: '{size} × {size} 棋盘只能使用 1–{size}。',
+    imported: '已导入 {size} × {size} 棋盘。', copied: '题目已复制。',
+    copyManually: '长按已选中的文本并选择「复制」；使用键盘时按 Ctrl / ⌘ + C。',
+    invalidSize: '棋盘边长必须是 3、4、5 或 6。',
+    invalidCount: '格子数量必须与棋盘大小一致。',
+    invalidTarget: '问号位置超出棋盘范围。',
+    invalidTimeLimit: '计算时限必须是非负的有限数值。',
+    invalidValue: '请输入 0 至 {size} 的整数，0 表示空格。',
+    duplicate: '第 {line} {axis}的图形 {value} 重复。',
+    row: '行', column: '列',
+    unsatisfiable: '这些已知图形无法组成符合规则的棋盘。',
+    invalidFallback: '请检查输入，每行、每列的每种图形应各出现一次。'
+  }
+};
+
+const LANGUAGE_STORAGE='gap-calculator-language';
+let language='en';
+try{const stored=localStorage.getItem(LANGUAGE_STORAGE);if(stored==='en'||stored==='zh')language=stored;}catch{}
+const t=(key,params={})=>COPY[language][key].replace(/\{(\w+)\}/g,(_,name)=>String(params[name]??''));
+let names=COPY[language].names,colorNames=COPY[language].colorNames;
+let importFeedback=null,noticeKey=null;
+function renderFeedback(){
+  $('import-error').hidden=importFeedback?.kind!=='error';
+  $('import-message').hidden=importFeedback?.kind!=='message';
+  if(importFeedback)$('import-'+importFeedback.kind).textContent=t(importFeedback.key,importFeedback.params);
+  $('notice').textContent=noticeKey?t(noticeKey):'';
+}
+function feedback(kind,key,params={}){importFeedback={kind,key,params};renderFeedback();}
+function applyLanguage(){
+  document.documentElement.lang=language==='zh'?'zh-CN':'en';document.title=t('title');
+  $('language').value=language;names=COPY[language].names;colorNames=COPY[language].colorNames;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n);});
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>{el.setAttribute('aria-label',t(el.dataset.i18nAria));});
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>{el.title=t(el.dataset.i18nTitle);});
+  renderFeedback();renderBoard();renderAnswer();
+}
+function solverError(error){
+  if(!error?.code||!COPY[language][error.code])return t('invalidFallback');
+  const params={...error.params};if(params.axis)params.axis=t(params.axis);
+  return t(error.code,params);
+}
+const SAMPLE=[0,0,0,2,0,5,0,0,3,0,4,0,0,5,0,0,0,2,0,3,0,0,4,0,0];
+const STORAGE='gap-calculator-v2';
+let state={size:5,values:SAMPLE.slice(),target:16,selected:0,advance:true,isSample:true};
+let result=null,history=[],worker=null,workerURL=null,timer=null,requestId=0,busy=true;
+try{const saved=JSON.parse(localStorage.getItem(STORAGE));if(saved&&Number.isInteger(saved.size)&&saved.size>=3&&saved.size<=6&&Array.isArray(saved.values)&&saved.values.length===saved.size**2&&saved.values.every(v=>Number.isInteger(v)&&v>=0&&v<=saved.size)){state={...state,...saved};if(!Number.isInteger(state.selected)||state.selected<0||state.selected>=state.values.length)state.selected=0;if(!Number.isInteger(state.target)||state.target<0||state.target>=state.values.length||state.values[state.target])state.target=null;}}catch{}
+const shape=(v)=>'<span class="shape s'+v+'" aria-hidden="true"></span>';
+const location=i=>t('location',{row:Math.floor(i/state.size)+1,col:i%state.size+1});
+const chosen=()=>state.target===null?state.selected:state.target;
+const hasSolution=()=>result&&Array.isArray(result.solution);
+const save=()=>{try{localStorage.setItem(STORAGE,JSON.stringify(state));}catch{}};
+const announce=key=>{noticeKey=key;renderFeedback();};
+function checkpoint(){history.push(JSON.stringify(state));if(history.length>80)history.shift();$('undo').disabled=false;}
+function renderBoard(){
+  $('size').value=state.size;$('advance').checked=state.advance;
+  $('grid').style.setProperty('--n',state.size);$('palette').style.setProperty('--n',state.size);
+  $('filled').textContent=t('filled',{count:state.values.filter(Boolean).length,total:state.values.length});
+  $('sample-tag').hidden=!state.isSample;
+  const showing=$('show-solution').checked&&hasSolution()&&!busy;
+  $('view-tag').hidden=!showing;$('sample-tag').hidden=showing||!state.isSample;
+  $('reference-note').hidden=!showing;
+  const errors=new Set((result?.errors||[]).flatMap(e=>e.cells||[]));
+  let html='<span class="axis" aria-hidden="true"></span>';
+  for(let c=0;c<state.size;c++)html+='<span class="axis" aria-hidden="true">'+(c+1)+'</span>';
+  for(let i=0;i<state.values.length;i++){
+    if(i%state.size===0)html+='<span class="axis" aria-hidden="true">'+(Math.floor(i/state.size)+1)+'</span>';
+    const given=state.values[i],v=given||(showing?result.solution[i]:0),target=i===state.target,selected=i===state.selected;
+    const multiple=showing&&!given&&((result.candidates[i]||[]).length>1);
+    const label=[location(i),target?t('targetCell'):'',given?colorNames[given]:(v?t('referenceCell',{shape:colorNames[v]}):t('blankCell')),multiple?t('otherPossibilities'):''].filter(Boolean).join(t('cellSeparator'));
+    html+='<button type="button" class="cell'+(target?' target':'')+(selected?' selected':'')+(errors.has(i)?' error':'')+(!given&&v?' inferred':'')+'" data-cell="'+i+'" tabindex="'+(selected?'0':'-1')+'" aria-label="'+label+'" aria-pressed="'+selected+'">'+(v?shape(v):target?'<span class="question" aria-hidden="true">?</span>':'')+(v?'<span class="cell-num" aria-hidden="true">'+v+'</span>':'')+(target&&v?'<span class="target-dot" aria-hidden="true">?</span>':'')+(multiple?'<span class="multi-dot" aria-hidden="true"></span>':'')+'</button>';
+  }
+  $('grid').innerHTML=html;
+  $('selected-location').textContent=t('selected',{location:location(state.selected)});
+  $('target-button').textContent=t(state.selected===state.target?'unmarkTarget':'markTarget');
+  $('target-button').title=t(state.selected===state.target?'unmarkTargetHelp':'markTargetHelp');
+  $('erase').disabled=!state.values[state.selected]&&state.target!==state.selected;
+  $('undo').disabled=history.length===0;
+  $('palette-hint').textContent=t('paletteHint',{size:state.size});
+  $('palette').innerHTML=Array.from({length:state.size},(_,k)=>'<button type="button" class="shape-button" data-value="'+(k+1)+'" aria-label="'+t('inputShape',{value:k+1,shape:colorNames[k+1]})+'">'+shape(k+1)+'<span class="shape-key"><span class="key">'+(k+1)+'</span><span class="shape-name">'+names[k+1]+'</span></span></button>').join('');
+}
+function focusCell(){document.querySelector('[data-cell="'+state.selected+'"]')?.focus({preventScroll:true});}
+function renderAnswer(){
+  const i=chosen(),r=result,known=state.values[i];
+  $('answer-label').textContent=t(state.target!==null?'targetAnswer':'currentAnswer');
+  $('answer-location').textContent=location(i);
+  $('answer-panel').classList.remove('result-error');
+  $('show-solution').disabled=busy||!hasSolution();
+  function set(title,subtitle,badge,art,rule){$('answer-title').textContent=title;$('answer-subtitle').textContent=subtitle;$('certainty').innerHTML='<span>'+badge+'</span>';$('answer-art').innerHTML=art;$('answer-rule').textContent=rule;$('mobile-title').textContent=title;$('mobile-detail').textContent=location(i)+' · '+badge;$('mobile-art').innerHTML=art;}
+  $('answer-art').classList.remove('multiple');
+  if(busy||!r){$('timing').textContent=t('calculating');set(t('calculatingTitle'),t('calculatingSubtitle'),t('autoSolve'),'<span class="placeholder-symbol">…</span>',t('autoUpdate'));return;}
+  if(r.status==='error'){$('timing').textContent=t('unfinished');set(t('calculationFailed'),t('retryHelp'),t('undetermined'),'<span class="placeholder-symbol">!</span>',t('retryHelp'));return;}
+  $('timing').textContent=t(r.status==='timeout'?'elapsedLimit':'elapsed',{ms:Math.max(1,Math.round(r.elapsedMs||0))});
+  if(r.status==='invalid'||r.status==='unsatisfiable'){
+    $('answer-panel').classList.add('result-error');
+    const detail=r.status==='invalid'?solverError(r.errors?.[0]):t('unsatisfiable');
+    set(t(r.status==='invalid'?'invalidTitle':'unsatisfiableTitle'),detail,t('checkGivens'),'<span class="placeholder-symbol">!</span>',t(r.status==='invalid'?'conflictHelp':'unsatisfiableHelp'));return;
+  }
+  if(!hasSolution()){set(t('unfinished'),t('timeLimitHelp'),t('undetermined'),'<span class="placeholder-symbol">…</span>',t('noSolutionYet'));return;}
+  const cs=r.candidates[i]||[],verified=r.verified?r.verified[i]:r.complete;
+  const globalNote=t(r.unique===true?'uniqueBoard':r.unique===false?'multipleBoards':'unknownBoard');
+  if(known){set(colorNames[known],t('givenSubtitle',{value:known}),t('givenBadge'),shape(known),t('givenHelp'));}
+  else if(verified&&cs.length===1){set(colorNames[cs[0]],t('certainSubtitle',{value:cs[0]}),t('certainBadge'),shape(cs[0]),globalNote);}
+  else if(verified){$('answer-art').classList.add('multiple');set(t('possibilities',{count:cs.length}),t('possibleNumbers',{values:cs.join(t('listSeparator'))}),t('moreClues'),cs.map(shape).join(''),t('multipleHelp'));}
+  else{$('answer-art').classList.add('multiple');set(t('notFullyVerified'),t('witnessed',{values:cs.join(t('listSeparator'))}),t('timeLimit'),cs.map(shape).join(''),t('partialHelp'));}
+}
+function schedule(delay=60){
+  clearTimeout(timer);requestId++;const id=requestId;busy=true;result=null;
+  if(worker){worker.terminate();worker=null;}
+  renderBoard();renderAnswer();
+  timer=setTimeout(()=>{
+    const payload={size:state.size,values:state.values.slice(),target:chosen(),timeLimitMs:1500};
+    const accept=r=>{if(id!==requestId)return;result=r;busy=false;const focused=document.activeElement?.dataset?.cell;renderBoard();renderAnswer();if(focused!==undefined)focusCell();};
+    const fallback=()=>{setTimeout(()=>{if(id!==requestId)return;try{accept(GapSolver.analyze({...payload,timeLimitMs:250}));}catch{accept({status:'error',solution:null,errors:[],candidates:[]});}},0);};
+    try{
+      if(!workerURL){const code=$('solver-code').textContent+'\nself.onmessage = function(e) { try { self.postMessage({ok:true,result:GapSolver.analyze(e.data)}); } catch(error) {self.postMessage({ok:false});} };';workerURL=URL.createObjectURL(new Blob([code],{type:'text/javascript'}));}
+      const taskWorker=new Worker(workerURL);worker=taskWorker;
+      const cleanup=()=>{taskWorker.terminate();if(worker===taskWorker)worker=null;};
+      taskWorker.onmessage=e=>{if(id!==requestId){cleanup();return;}cleanup();if(e.data.ok)accept(e.data.result);else fallback();};
+      taskWorker.onerror=()=>{if(id!==requestId){cleanup();return;}cleanup();fallback();};
+      taskWorker.postMessage(payload);
+    }catch{fallback();}
+  },delay);
+}
+function changed(){state.isSample=false;importFeedback=null;noticeKey=null;renderFeedback();save();schedule();}
+function select(i){state.selected=(i+state.values.length)%state.values.length;renderBoard();renderAnswer();save();}
+function put(v){if(v<0||v>state.size)return;checkpoint();state.values[state.selected]=v;if(state.target===state.selected)state.target=null;if(state.advance&&v)state.selected=(state.selected+1)%state.values.length;changed();focusCell();}
+function erase(){if(!state.values[state.selected]&&state.target!==state.selected)return;checkpoint();state.values[state.selected]=0;if(state.target===state.selected)state.target=null;changed();focusCell();}
+function setTarget(){checkpoint();if(state.target===state.selected)state.target=null;else{state.values[state.selected]=0;state.target=state.selected;}changed();focusCell();}
+function undo(){if(!history.length)return;state=JSON.parse(history.pop());save();schedule();focusCell();}
+$('grid').addEventListener('click',e=>{const cell=e.target.closest('[data-cell]');if(!cell)return;select(Number(cell.dataset.cell));focusCell();});
+$('palette').addEventListener('click',e=>{const b=e.target.closest('[data-value]');if(b)put(Number(b.dataset.value));});
+$('target-button').onclick=setTarget;$('erase').onclick=erase;$('undo').onclick=undo;
+$('advance').onchange=()=>{state.advance=$('advance').checked;save();};
+$('show-solution').onchange=()=>{renderBoard();};
+$('size').onchange=()=>{checkpoint();state={...state,size:Number($('size').value),values:Array(Number($('size').value)**2).fill(0),target:null,selected:0,isSample:false};$('show-solution').checked=false;changed();};
+$('clear').onclick=()=>{checkpoint();state.values.fill(0);state.target=null;state.selected=0;$('show-solution').checked=false;changed();announce('cleared');};
+$('sample').onclick=()=>{checkpoint();state={...state,size:5,values:SAMPLE.slice(),target:16,selected:0,isSample:true};$('show-solution').checked=false;save();schedule();announce('sampleLoaded');};
+$('solve').onclick=()=>schedule(0);
+$('language').onchange=()=>{language=$('language').value;try{localStorage.setItem(LANGUAGE_STORAGE,language);}catch{}applyLanguage();};
+$('theme').value=window.GapTheme.getMode();
+$('theme').onchange=()=>window.GapTheme.setMode($('theme').value);
+document.addEventListener('keydown',e=>{
+  if(e.isComposing||e.altKey)return;
+  if(e.target.closest('textarea,input,select,[contenteditable="true"]'))return;
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();return;}
+  if(e.ctrlKey||e.metaKey)return;
+  if(/^[1-6]$/.test(e.key)&&Number(e.key)<=state.size){e.preventDefault();put(Number(e.key));return;}
+  if(e.key==='?'||e.key==='/'){e.preventDefault();setTarget();return;}
+  if(['Backspace','Delete','0'].includes(e.key)){e.preventDefault();erase();return;}
+  const deltas={ArrowLeft:-1,ArrowRight:1,ArrowUp:-state.size,ArrowDown:state.size};
+  if(e.key in deltas){e.preventDefault();select(state.selected+deltas[e.key]);focusCell();return;}
+  if(e.key===' '&&e.target.closest('[data-cell]')){e.preventDefault();select(state.selected+1);focusCell();return;}
+  if(e.key==='Enter'&&(e.target===document.body||e.target.closest('[data-cell]'))){e.preventDefault();schedule(0);}
+});
+$('import').onclick=()=>{
+  const text=$('paste').value.replace(/[０-９]/g,c=>String(c.charCodeAt(0)-65296)).replace(/？/g,'?').trim();
+  function error(key,params={}){feedback('error',key,params);}
+  if(!text){error('pasteFirst');return;}
+  if(/[^0-6.?\s,，;；|\[\]()]/.test(text)){error('invalidCharacters');return;}
+  const cells=text.match(/[0-6.?]/g)||[],n=Math.sqrt(cells.length);
+  if(!Number.isInteger(n)||n<3||n>6){error('wrongCellCount',{count:cells.length});return;}
+  if(cells.filter(c=>c==='?').length>1){error('tooManyTargets');return;}
+  if(cells.some(c=>Number(c)>n)){error('valueOutsideGrid',{size:n});return;}
+  checkpoint();state.size=n;state.values=cells.map(c=>Number(c)||0);state.target=cells.indexOf('?');if(state.target<0)state.target=null;state.selected=state.target??0;$('show-solution').checked=false;changed();feedback('message','imported',{size:n});
+};
+$('copy').onclick=async()=>{
+  const rows=[];for(let r=0;r<state.size;r++)rows.push(state.values.slice(r*state.size,(r+1)*state.size).map((v,c)=>r*state.size+c===state.target?'?':v).join(' '));const text=rows.join('\n');
+  try{await navigator.clipboard.writeText(text);feedback('message','copied');}
+  catch{$('paste').value=text;$('paste').focus();$('paste').select();feedback('message','copyManually');}
+};
+window.addEventListener('beforeunload',()=>{worker?.terminate();if(workerURL)URL.revokeObjectURL(workerURL);});
+applyLanguage();schedule(0);
+})();
+</script>
+</body>
+</html>
